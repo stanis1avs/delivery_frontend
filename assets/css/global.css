@@ -1,0 +1,80 @@
+@import 'variables.scss';
+@import 'base.scss';
+@import 'typography.scss';
+
+body {
+  background-color: #FDFBF0;
+  margin: 5px 10px;
+}
+
+.tracking-layout {
+  display: grid;
+/*  grid-template-columns: 100px auto;*/
+  grid-template-columns: 5vw auto;
+  gap: var(--gap);
+  margin-right: 20px;
+}
+
+
+main {
+  display: grid;
+  grid-template-rows: 70px auto;
+}
+
+
+.main-body {
+  display: grid;
+/*  grid-template-columns: 350px auto;*/
+  grid-template-columns: 19vw auto;
+  gap: var(--gap);
+}
+
+.main-title {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+}
+
+.profile-image {
+  width: 48px;
+  height: 48px;
+  justify-self: end;
+}
+
+
+.main-content {
+  display: grid;
+  grid-template-columns: 1.5fr auto;
+  gap: var(--gap);
+  background-color: #fff;
+  border-radius: var(--main-border-radius);;
+}
+
+.truck-info {
+  height: calc(100vh - 80px - 80px);
+  display: grid;
+  grid-template-rows: auto;
+  gap: var(--gap);
+}
+
+.truck-info:nth-child(1) {
+  margin: 20px 0 20px 20px;
+}
+
+.truck-info:nth-child(2) {
+  width: 30vw;
+  grid-template-rows: 3fr auto;
+  margin: 20px 20px 20px 0;
+}
+
+.truck-image {
+  width: 100%;
+  height: auto;
+  max-height: 40vh;
+}
+
+@media (max-width: 1366px) {
+  .truck-image {
+    content: url('/truck-mobile.png');
+  }
+}

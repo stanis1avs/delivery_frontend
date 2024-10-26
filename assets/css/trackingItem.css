@@ -1,0 +1,125 @@
+.tracking-item {
+  background-color: #fff;
+  width: 100%;
+  border-radius: var(--second-border-radius);
+  cursor: pointer;
+}
+
+.tracking-item-active {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+p {
+  margin: 5px 0;
+}
+
+.progress-bar {
+  height: 20px;
+  background-color: var(--secondary-color);
+  border-top-left-radius: var(--second-border-radius);
+  border-top-right-radius: var(--second-border-radius);
+}
+
+.progress {
+  display: block;
+  height: 20px;
+  width: 75%;
+  background-color: var(--primary-color);
+  border-top-left-radius: var(--second-border-radius);
+}
+
+.progress-bar-active {
+  background-color: #d8d196;
+}
+
+.progress-active {
+  background-color: #000;
+}
+
+.tracking-info {
+  padding: 0 var(--padding);
+}
+
+button {
+  padding: 10px 20px;
+  background-color: var(--secondary-color);
+  border-radius: var(--second-border-radius);
+  font-size: var(--small-font-size);
+}
+
+button:hover {
+  background-color: #e3d8b0;
+}
+
+.button-active {
+  margin-bottom: 15px;
+  background-color: #000;
+  color: #fff;
+}
+
+.tracking-status {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.tracking-statuses {
+  padding: var(--padding);
+}
+
+.tracking-statuses-active {
+  border-top: 2px dashed #fff;
+}
+
+.tracking-status-active:not(:last-of-type)::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: 12px;
+  height: 100%;
+  border-left: 2px dashed #fff;
+  z-index: 1;
+}
+
+.status-icon {
+  width: 24px;
+  height: 24px;
+  background-color: var(--primary-color);
+  border-radius: 50%;
+  margin-right: 10px;
+  position: relative;
+  z-index: 2;
+}
+
+.status-icon::before {
+  content: "";
+  top: 8px;
+  left: 8px;
+  width: 8px;
+  height: 8px;
+  background-color: #000;
+  border-radius: 50%;
+  position: absolute;
+}
+
+.status-icon-active {
+  background-color: #fff;
+}
+
+.status-icon-current {
+  opacity: 0.5;
+}
+
+.status-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.status-message {
+  font-size: var(--middle-font-size);
+}
+
+.status-location {
+  color: var(--tertiary-color);
+}
