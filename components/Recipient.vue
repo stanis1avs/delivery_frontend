@@ -12,7 +12,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "@/assets/css/mixins.scss";
+@use '../assets/css/mixins.scss' as mixins;
 
 .recipient-info {
   background-color: #000;
