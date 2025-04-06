@@ -4,13 +4,18 @@
     <main>
       <div class="main-title">
         <h1>Tracking</h1>
-        <img class="profile-image" src="/profile.jpg" alt="Profile" @click="toggleTelegramAuth" />
+        <img
+          v-if="user"
+          class="profile-image"
+          :src="user.photo_url"
+          alt="Profile"
+          @click="toggleLogoutPopup"
+        />
       </div>
-      <div v-if="showPopup" class="telegram-popup">
+      <div v-if="showLogoutPopup" class="logout-popup" @click.self="showLogoutPopup = false">
         <div class="popup-content">
-          <h3>Авторизация через Telegram</h3>
-          <div id="telegram-login-container"></div>
-          <button @click="closePopup">Закрыть</button>
+          <p>{{ user.first_name }}</p>
+          <button class="logout-btn" @click="logout">Выйти</button>
         </div>
       </div>
       <slot />
@@ -24,38 +29,42 @@ import Navbar from '@/components/Navbar.vue';
 export default {
   data() {
     return {
-      showPopup: false,
+      user: null,
+      showLogoutPopup: false,
     };
   },
-  methods: {
-    toggleTelegramAuth() {
-      this.showPopup = true;
-      this.$nextTick(() => {
-        this.loadTelegramWidget();
-      });
-    },
-    closePopup() {
-      this.showPopup = false;
-    },
-    loadTelegramWidget() {
-      const botUsername = 'DeliveryAuthBot';
-      const authUrl = 'https://6eca-198-98-50-3.ngrok-free.app/api/signup/telegram-login';
-
-      const existingScript = document.querySelector('script[data-telegram-widget]');
-      if (existingScript) {
-        existingScript.remove();
+  mounted() {
+    const userParam = this.$route.query.user;
+    if (userParam) {
+      try {
+        const user = JSON.parse(decodeURIComponent(userParam));
+        localStorage.setItem('tg_user', JSON.stringify(user));
+        this.user = user;
+        navigateTo('/');
+      } catch (e) {
+        console.error('Ошибка обработки пользователя:', e);
+        navigateTo('/login');
       }
-
-      const script = document.createElement('script');
-      script.src = 'https://telegram.org/js/telegram-widget.js?22';
-      script.async = true;
-      script.dataset.telegramLogin = botUsername;
-      script.dataset.size = 'large';
-      script.dataset.authUrl = authUrl;
-      script.dataset.requestAccess = 'write';
-      script.dataset.telegramWidget = 'true';
-      document.getElementById('telegram-login-container').appendChild(script);
+    } else {
+      const storedUser = localStorage.getItem('tg_user');
+      if (storedUser) {
+        this.user = JSON.parse(storedUser);
+      } else {
+        navigateTo('/login');
+      }
+    }
+  },
+  methods: {
+    toggleLogoutPopup() {
+      this.showLogoutPopup = !this.showLogoutPopup;
     },
+    logout() {
+      if (process.client) {
+        localStorage.removeItem('tg_user');
+      }
+      this.showLogoutPopup = false;
+      this.$router.push('/login?relogin=true');
+    }
   },
   components: {
     Navbar,
@@ -64,30 +73,36 @@ export default {
 </script>
 
 <style scoped>
-.telegram-popup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+.profile-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.logout-popup {
+  position: absolute;
+  top: 60px;
+  right: 20px;
   background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .popup-content {
   background: white;
-  padding: 20px;
-  border-radius: 5px;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  min-width: 150px;
 }
 
-.telegram-login-btn {
-  display: inline-block;
-  padding: 10px 20px;
-  background-color: #0088cc;
+.logout-btn {
+  margin-top: 10px;
+  padding: 8px 14px;
+  background: #f44336;
   color: white;
-  border-radius: 5px;
-  text-decoration: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
 }
 </style>
