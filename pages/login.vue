@@ -19,22 +19,51 @@
   
   <script>
   export default {
-    mounted() {
-      const botUsername = 'DeliveryAuthBot';
-      const authUrl = 'https://eeda-198-98-50-3.ngrok-free.app/api/signup/telegram-login';
-    
-    //   const relogin = this.$route.query.relogin;
+    methods: {
+      openOAuthInPopup() {
+        const runtimeConfig = useRuntimeConfig();
+        const botId = runtimeConfig.public?.telegramBotId;
+        const returnTo = `${window.location.origin}/login`;
+        const oauthUrl = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${window.location.origin}&embed=1&request_access=write&return_to=${encodeURIComponent(returnTo)}`;
 
-    //   if (relogin) {
-    //     window.location.href = `https://oauth.telegram.org/auth?bot=${botUsername}&origin=${window.location.origin}&embed=1&request_access=write&return_to=${encodeURIComponent(authUrl)}`;
-    //     return;
-    //   }
+        const width = 600;
+        const height = 700;
+        const left = (window.screen.width - width) / 2;
+        const top = (window.screen.height - height) / 2;
+
+        window.open(
+          oauthUrl,
+          '_blank',
+          `toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=${width},height=${height},top=${top},left=${left}`
+        );
+      }
+    },
+    mounted() {
+      const runtimeConfig = useRuntimeConfig();
+      const apiUrl = runtimeConfig.public?.apiUrl
+      const botUsername = runtimeConfig.public?.telegramBotName;
+      const authUrl = `${apiUrl}/api/signup/telegram-login`;
+    
+      const relogin = this.$route.query.relogin;
+
+      const hash = window.location.hash;
+      if (hash.startsWith('#tgAuthResult=')) {
+        try {
+          const encoded = decodeURIComponent(hash.slice('#tgAuthResult='.length));
+          const authData = JSON.parse(atob(encoded));
+          localStorage.setItem('tg_user', JSON.stringify(authData));
+          navigateTo('/');
+        } catch (e) {
+          console.error('Ошибка обработки Telegram ответа:', e);
+        }
+        return;
+      }
 
       const existingScript = document.querySelector('script[data-telegram-widget]');
       if (existingScript) existingScript.remove();
   
       const script = document.createElement('script');
-      script.src = 'https://telegram.org/js/telegram-widget.js?22';
+      script.src = runtimeConfig.public?.telegramWidgetUrl
       script.async = true;
       script.dataset.telegramLogin = botUsername;
       script.dataset.userpic = false;
