@@ -15,16 +15,14 @@
 <script>
 import TrackingItem from './TrackingItem.vue';
 import TrackingActiveItem from './TrackingActiveItem.vue';
+import { io } from 'socket.io-client';
 
 export default {
   data() {
     return {
       activeItem: null,
-      trackingItems: [
-        { id: '#12777489-DL-NY', status: 'Out for Delivery', details: 'ул. Ново-Садовая 106' },
-        { id: '#12777490-DL-NY', status: 'In Transit', details: 'ул. Мичурина 148' },
-        { id: '#12777491-DL-NY', status: 'In Transit', details: 'ул. Ленина 228' },
-      ],
+      trackingItems: [],
+      socket: null,
     };
   },
   methods: {
@@ -47,6 +45,56 @@ export default {
     removeItem(index) {
       this.trackingItems.splice(index, 1);
     },
+    handleIncomingMessage(message) {
+      if (message.type === 'new-order') {
+        this.trackingItems.push({
+          id: `#${message.data.id}`,
+          status: message.data.status,
+          details: message.data.details,
+        });
+      }
+    },
+  },
+  mounted() {
+    const runtimeConfig = useRuntimeConfig();
+    const serverUrl = runtimeConfig.public?.serverUrl
+
+    this.socket = io(serverUrl,  {
+      path: '/socket.io',
+      transports: ['websocket'],
+      secure: true,
+    });
+
+    this.socket.on('connect', () => {
+      console.log('Connected to socket server');
+    });
+
+    this.socket.on('connect_error', (err) => {
+      console.error('connect_error', err);
+    });
+
+    this.socket.on('disconnect', (reason) => {
+      console.warn('disconnected', reason);
+    });
+
+    this.socket.on('new-order', (order) => {
+      console.log('New order received:', order);
+
+      const formatted = {
+        id: `#${order.id}`,
+        status: order.status || 'In Transit',
+        details: order.delivery_address || 'Не указано',
+      };
+
+      this.trackingItems.push(formatted);
+    });
+
+    this.socket.on('disconnect', () => {
+      console.log('Socket disconnected');
+    });
+  },
+  beforeUnmount() {
+    if (this.socket) this.socket.disconnect();
   },
   components: {
     TrackingItem,
