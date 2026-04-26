@@ -36,7 +36,7 @@ export default {
   },
 
   mounted() {
-    if (!process.client) return;
+    if (!import.meta.client) return;
 
     const userParam = this.$route.query.user;
     if (userParam) {
@@ -73,7 +73,7 @@ export default {
   },
 
   beforeUnmount() {
-    if (process.client) {
+    if (import.meta.client) {
       const { stopTracking } = useGeoLocation();
       stopTracking();
     }
@@ -84,7 +84,7 @@ export default {
       this.showLogoutPopup = !this.showLogoutPopup;
     },
     logout() {
-      if (process.client) {
+      if (import.meta.client) {
         const { stopTracking } = useGeoLocation();
         stopTracking();
         localStorage.removeItem('tg_user');
@@ -100,7 +100,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .profile-image {
   width: 40px;
   height: 40px;
@@ -112,14 +112,15 @@ export default {
 .logout-popup {
   position: absolute;
   top: 60px;
-  right: 20px;
+  right: var(--padding);
   background: rgba(0, 0, 0, 0.5);
+  z-index: 100;
 }
 
 .popup-content {
-  background: white;
-  padding: 15px;
-  border-radius: 8px;
+  background: #fff;
+  padding: var(--padding);
+  border-radius: var(--second-border-radius);
   text-align: center;
   min-width: 150px;
 }
@@ -128,9 +129,12 @@ export default {
   margin-top: 10px;
   padding: 8px 14px;
   background: #f44336;
-  color: white;
-  border: none;
+  color: #fff;
   border-radius: 6px;
   cursor: pointer;
+
+  &:hover {
+    background: darken(#f44336, 8%);
+  }
 }
 </style>

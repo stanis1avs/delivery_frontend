@@ -26,7 +26,7 @@ export default {
   },
 
   async mounted() {
-    if (!process.client) return;
+    if (!import.meta.client) return;
 
     const L = await import('leaflet');
     await import('leaflet/dist/leaflet.css');
@@ -155,7 +155,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .map-wrapper {
   position: relative;
   width: 100%;
@@ -176,14 +176,20 @@ export default {
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
-  background: white;
-  border-radius: 8px;
+  background: #fff;
+  border-radius: var(--second-border-radius);
   padding: 6px 18px;
   display: flex;
-  gap: 20px;
-  font-size: 14px;
+  gap: var(--gap);
+  font-size: var(--small-font-size);
   font-weight: 600;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+
+  @include responsive(768px) {
+    font-size: 13px;
+    padding: 5px 12px;
+    gap: 12px;
+  }
 }
 </style>
 
@@ -192,7 +198,7 @@ export default {
   width: 14px;
   height: 14px;
   background: #22c55e;
-  border: 2px solid white;
+  border: 2px solid #fff;
   border-radius: 50%;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }

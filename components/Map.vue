@@ -25,7 +25,7 @@ export default {
   },
 
   async mounted() {
-    if (!process.client) return;
+    if (!import.meta.client) return;
 
     // Leaflet загружается только на клиенте (SSR-safe)
     const L = await import('leaflet');
@@ -164,7 +164,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .map-wrapper {
   position: relative;
   height: calc(100vh - 70px - 21px);
@@ -183,24 +183,29 @@ export default {
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
-  background: white;
-  border-radius: 8px;
+  background: #fff;
+  border-radius: var(--second-border-radius);
   padding: 8px 20px;
   display: flex;
-  gap: 24px;
-  font-size: 15px;
+  gap: var(--gap);
+  font-size: var(--small-font-size);
   font-weight: 600;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+
+  @include responsive(768px) {
+    font-size: 13px;
+    padding: 6px 14px;
+    gap: 12px;
+  }
 }
 </style>
 
 <style>
-/* Глобальный стиль для маркера курьера */
 .courier-dot {
   width: 14px;
   height: 14px;
   background: #22c55e;
-  border: 2px solid white;
+  border: 2px solid #fff;
   border-radius: 50%;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }

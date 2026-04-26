@@ -143,12 +143,16 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .sidebar {
   display: flex;
   flex-direction: column;
   gap: var(--gap);
   overflow-y: auto;
   max-height: calc(100vh - 80px);
+
+  @include responsive(768px) {
+    max-height: 40vh;
+  }
 }
 </style>
