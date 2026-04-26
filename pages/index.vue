@@ -11,7 +11,7 @@
           </div>
         </div>
         <div class="truck-info">
-          <MapComponent />
+          <MapComponent ref="mapComponent" />
           <Recipient />
         </div>
       </div>
@@ -35,6 +35,13 @@ export default {
     DetailsDelivery,
     MapComponent,
     Recipient,
-  }
+  },
+
+  // Предоставляем ссылку на карту всем дочерним компонентам (Sidebar и др.)
+  provide() {
+    return {
+      getMapRef: () => this.$refs.mapComponent,
+    };
+  },
 };
 </script>
