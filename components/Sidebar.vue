@@ -2,7 +2,7 @@
   <div class="sidebar">
     <component
       v-for="(item, index) in trackingItems"
-      :key="index"
+      :key="item.id"
       :item="item"
       :is="activeItem === index ? 'TrackingActiveItem' : 'TrackingItem'"
       @update-active="setActiveItem(index)"
@@ -34,63 +34,52 @@ export default {
 
       this.trackingItems[index].timer = setTimeout(() => {
         this.removeItem(index);
-      }, 300000); //  5 минут
+      }, 300000); // 5 минут
     },
     cancelCompletion(index) {
       this.trackingItems[index].isCompleted = false;
-
       clearTimeout(this.trackingItems[index].timer);
       this.trackingItems[index].timer = null;
     },
     removeItem(index) {
       this.trackingItems.splice(index, 1);
     },
-    handleIncomingMessage(message) {
-      if (message.type === 'new-order') {
-        this.trackingItems.push({
-          id: `#${message.data.id}`,
-          status: message.data.status,
-          details: message.data.details,
-        });
-      }
+    handleNewOrder(order) {
+      // Дедупликация: не добавлять заказ, если он уже есть в списке
+      const alreadyExists = this.trackingItems.some((item) => item.id === `#${order.id}`);
+      if (alreadyExists) return;
+
+      this.trackingItems.push({
+        id: `#${order.id}`,
+        status: order.status || 'In Transit',
+        details: order.details || 'Не указано',
+      });
     },
   },
   mounted() {
     const runtimeConfig = useRuntimeConfig();
-    const serverUrl = runtimeConfig.public?.serverUrl
+    const serverUrl = runtimeConfig.public?.serverUrl;
 
-    this.socket = io(serverUrl,  {
+    this.socket = io(serverUrl, {
       path: '/socket.io',
       transports: ['websocket'],
-      secure: true,
     });
 
     this.socket.on('connect', () => {
-      console.log('Connected to socket server');
+      // Вступить в комнату диспетчеров для получения обновлений заказов
+      this.socket.emit('join-dispatchers');
     });
 
     this.socket.on('connect_error', (err) => {
-      console.error('connect_error', err);
-    });
-
-    this.socket.on('disconnect', (reason) => {
-      console.warn('disconnected', reason);
+      console.error('Socket connect_error:', err);
     });
 
     this.socket.on('new-order', (order) => {
-      console.log('New order received:', order);
-
-      const formatted = {
-        id: `#${order.id}`,
-        status: order.status || 'In Transit',
-        details: order.delivery_address || 'Не указано',
-      };
-
-      this.trackingItems.push(formatted);
+      this.handleNewOrder(order);
     });
 
-    this.socket.on('disconnect', () => {
-      console.log('Socket disconnected');
+    this.socket.on('disconnect', (reason) => {
+      console.warn('Socket disconnected:', reason);
     });
   },
   beforeUnmount() {
