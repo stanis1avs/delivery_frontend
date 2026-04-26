@@ -25,6 +25,7 @@
 
 <script>
 import Navbar from '@/components/Navbar.vue';
+import { useGeoLocation } from '@/composables/useGeoLocation.js';
 
 export default {
   data() {
@@ -33,6 +34,7 @@ export default {
       showLogoutPopup: false,
     };
   },
+
   mounted() {
     if (!process.client) return;
 
@@ -55,24 +57,43 @@ export default {
         } catch {
           localStorage.removeItem('tg_user');
           navigateTo('/login');
+          return;
         }
       } else {
         navigateTo('/login');
+        return;
       }
     }
+
+    // Запустить геотрекинг — позиция курьера будет отправляться на сервер
+    if (this.user?.courierId) {
+      const { startTracking } = useGeoLocation();
+      startTracking(this.user.courierId);
+    }
   },
+
+  beforeUnmount() {
+    if (process.client) {
+      const { stopTracking } = useGeoLocation();
+      stopTracking();
+    }
+  },
+
   methods: {
     toggleLogoutPopup() {
       this.showLogoutPopup = !this.showLogoutPopup;
     },
     logout() {
       if (process.client) {
+        const { stopTracking } = useGeoLocation();
+        stopTracking();
         localStorage.removeItem('tg_user');
       }
       this.showLogoutPopup = false;
       this.$router.push('/login?relogin=true');
     },
   },
+
   components: {
     Navbar,
   },
