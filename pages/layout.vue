@@ -34,6 +34,8 @@ export default {
     };
   },
   mounted() {
+    if (!process.client) return;
+
     const userParam = this.$route.query.user;
     if (userParam) {
       try {
@@ -48,7 +50,12 @@ export default {
     } else {
       const storedUser = localStorage.getItem('tg_user');
       if (storedUser) {
-        this.user = JSON.parse(storedUser);
+        try {
+          this.user = JSON.parse(storedUser);
+        } catch {
+          localStorage.removeItem('tg_user');
+          navigateTo('/login');
+        }
       } else {
         navigateTo('/login');
       }
@@ -64,7 +71,7 @@ export default {
       }
       this.showLogoutPopup = false;
       this.$router.push('/login?relogin=true');
-    }
+    },
   },
   components: {
     Navbar,

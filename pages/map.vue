@@ -1,6 +1,6 @@
 <template>
   <layout>
-    <MapComponent />
+    <Map />
   </layout>
 </template>
 
@@ -11,7 +11,7 @@ import Map from '@/components/Map.vue';
 export default {
   components: {
     Layout,
-    Map
+    Map,
   },
 };
 </script>
