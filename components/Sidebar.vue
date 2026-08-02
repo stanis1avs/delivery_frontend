@@ -57,17 +57,47 @@ export default {
       }
     },
 
-    markItemCompleted(index) {
-      this.trackingItems[index].isCompleted = true;
-      this.trackingItems[index].timer = setTimeout(() => {
+    async markItemCompleted(index) {
+      const item = this.trackingItems[index];
+      item.isCompleted = true;
+      // Завершить заказ на бэкенде: статус Completed, курьер освобождается (BUG-119)
+      await this._postOrderAction(item.rawId, 'complete');
+      item.timer = setTimeout(() => {
         this.removeItem(index);
-      }, 300000); // 5 минут
+      }, 300000); // 5 минут — грейс на отмену перед удалением карточки
     },
 
-    cancelCompletion(index) {
-      this.trackingItems[index].isCompleted = false;
-      clearTimeout(this.trackingItems[index].timer);
-      this.trackingItems[index].timer = null;
+    async cancelCompletion(index) {
+      const item = this.trackingItems[index];
+      item.isCompleted = false;
+      clearTimeout(item.timer);
+      item.timer = null;
+      // Откатить завершение на бэкенде (BUG-119)
+      await this._postOrderAction(item.rawId, 'revert');
+    },
+
+    async _postOrderAction(rawId, action) {
+      if (!rawId) return;
+      let token = '';
+      let courierId = '';
+      try {
+        const stored = JSON.parse(localStorage.getItem('tg_user') || '{}');
+        token = stored.geoToken || '';
+        courierId = stored.courierId || '';
+      } catch { /* нет пользователя */ }
+
+      try {
+        await fetch(`/api/orders/${rawId}/${action}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Courier-Token': token,
+            'X-Courier-Id': courierId,
+          },
+        });
+      } catch (err) {
+        console.error(`Ошибка действия "${action}" над заказом:`, err);
+      }
     },
 
     removeItem(index) {
@@ -85,6 +115,7 @@ export default {
 
       this.trackingItems.push({
         id: `#${order.id}`,
+        rawId: order.id, // исходный UUID для запросов к бэкенду
         status: order.status || 'In Transit',
         details: order.details || 'Не указано',
         // Координаты для маршрута (если бэкенд их передаёт)
@@ -110,6 +141,14 @@ export default {
 
     this.socket.on('connect', () => {
       this.socket.emit('join-dispatchers');
+
+      // Подписаться на персональную комнату курьера, чтобы получать только свои заказы (BUG-107)
+      try {
+        const stored = JSON.parse(localStorage.getItem('tg_user') || '{}');
+        if (stored.courierId) this.socket.emit('join-courier', stored.courierId);
+      } catch (e) {
+        /* нет сохранённого пользователя — пропускаем */
+      }
     });
 
     this.socket.on('connect_error', (err) => {
