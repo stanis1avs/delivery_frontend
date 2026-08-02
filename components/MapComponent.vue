@@ -40,8 +40,9 @@ export default {
 
     this.L = L.default;
 
-    // Инициализировать карту с дефолтной позицией, потом скорректировать
-    this.map = this.L.map(this.$refs.mapContainer).setView([55.75, 37.62], 11);
+    // Дефолтный центр — Самара (в зоне покрытия OSRM-данных Volga Federal District),
+    // далее корректируется по геолокации браузера (BUG-114)
+    this.map = this.L.map(this.$refs.mapContainer).setView([53.1959, 50.1002], 12);
 
     this.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
