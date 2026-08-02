@@ -1,15 +1,26 @@
 /**
  * Composable для отслеживания геопозиции курьера и отправки на сервер.
  *
- * Использование в layout.vue:
- *   const { startTracking, stopTracking } = useGeoLocation();
- *   onMounted(() => startTracking(user.courierId));
- *   onBeforeUnmount(() => stopTracking());
+ * Использование в layout.vue (ОДИН экземпляр на компонент, переиспользуется
+ * для start/stop, чтобы watchId не был общим глобальным состоянием — BUG-118):
+ *   const tracker = useGeoLocation();
+ *   onMounted(() => tracker.startTracking(user.courierId));
+ *   onBeforeUnmount(() => tracker.stopTracking());
  */
-
-let watchId = null;
-
 export function useGeoLocation() {
+  // watchId хранится в замыкании конкретного экземпляра, а не на уровне модуля (BUG-118)
+  let watchId = null;
+
+  // Токен курьера для авторизации запросов геопозиции (BUG-110)
+  function getCourierToken() {
+    try {
+      const stored = JSON.parse(localStorage.getItem('tg_user') || '{}');
+      return stored.geoToken || '';
+    } catch {
+      return '';
+    }
+  }
+
   /**
    * Начать отслеживание и отправку позиции на /api/geo/courier/location
    * @param {string} courierId
@@ -27,7 +38,10 @@ export function useGeoLocation() {
         try {
           await fetch('/api/geo/courier/location', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Courier-Token': getCourierToken(),
+            },
             body: JSON.stringify({ courierId, lat, lon }),
           });
         } catch (err) {
@@ -64,7 +78,7 @@ export function useGeoLocation() {
   }
 
   function stopTracking() {
-    if (watchId !== null) {
+    if (watchId !== null && typeof navigator !== 'undefined' && navigator.geolocation) {
       navigator.geolocation.clearWatch(watchId);
       watchId = null;
     }

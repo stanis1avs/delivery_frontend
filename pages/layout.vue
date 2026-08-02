@@ -32,11 +32,15 @@ export default {
     return {
       user: null,
       showLogoutPopup: false,
+      geoTracker: null,
     };
   },
 
   mounted() {
     if (!import.meta.client) return;
+
+    // Один экземпляр трекера на компонент — переиспользуется для start/stop (BUG-118)
+    this.geoTracker = useGeoLocation();
 
     const userParam = this.$route.query.user;
     if (userParam) {
@@ -67,15 +71,13 @@ export default {
 
     // Запустить геотрекинг — позиция курьера будет отправляться на сервер
     if (this.user?.courierId) {
-      const { startTracking } = useGeoLocation();
-      startTracking(this.user.courierId);
+      this.geoTracker.startTracking(this.user.courierId);
     }
   },
 
   beforeUnmount() {
     if (import.meta.client) {
-      const { stopTracking } = useGeoLocation();
-      stopTracking();
+      this.geoTracker?.stopTracking();
     }
   },
 
@@ -85,8 +87,7 @@ export default {
     },
     logout() {
       if (import.meta.client) {
-        const { stopTracking } = useGeoLocation();
-        stopTracking();
+        this.geoTracker?.stopTracking();
         localStorage.removeItem('tg_user');
       }
       this.showLogoutPopup = false;
