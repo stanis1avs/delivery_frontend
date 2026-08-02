@@ -23,6 +23,9 @@ export default defineNuxtConfig({
       // соединение работает и через HTTPS-тоннель, и с другого устройства.
       // Раньше он шёл напрямую на ws://localhost:7070 и был доступен только
       // с машины, где запущен бэкенд.
+      //
+      // ws:true оставлен на будущее, но апгрейд до WebSocket dev-сервер сейчас не
+      // пробрасывает — клиент ходит только polling'ом (см. комментарий в Sidebar.vue).
       '/socket.io': {
         target: `${process.env.SERVER_URL}/socket.io`,
         changeOrigin: true,

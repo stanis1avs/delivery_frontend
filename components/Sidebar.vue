@@ -134,10 +134,15 @@ export default {
     // Подключаемся к своему origin — Nuxt проксирует /socket.io на бэкенд.
     // Прямой адрес localhost:7070 работал только с машины бэкенда и блокировался
     // как mixed content на HTTPS-странице (ngrok).
-    // Транспорт не ограничиваем: polling с апгрейдом до websocket переживает прокси,
-    // websocket-only падал целиком, если апгрейд не проходил.
+    //
+    // Только polling: dev-прокси Nitro не умеет апгрейд до WebSocket — бэкенд
+    // отвечает 101 и шлёт бинарные кадры, а HTTP-парсер Node падает на них с
+    // «Parse Error: Invalid character in chunk size». Polling через прокси работает
+    // стабильно; для этого приложения его пропускной способности достаточно.
     this.socket = io({
       path: '/socket.io',
+      transports: ['polling'],
+      upgrade: false,
     });
 
     this.socket.on('connect', () => {

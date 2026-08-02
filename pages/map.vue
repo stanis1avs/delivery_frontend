@@ -24,9 +24,12 @@ export default {
   mounted() {
     if (!import.meta.client) return;
 
-    // Свой origin + прокси Nuxt — работает через HTTPS-тоннель и с других устройств
+    // Свой origin + прокси Nuxt — работает через HTTPS-тоннель и с других устройств.
+    // Только polling: dev-прокси Nitro не тянет апгрейд до WebSocket (см. Sidebar.vue)
     this.socket = io({
       path: '/socket.io',
+      transports: ['polling'],
+      upgrade: false,
     });
 
     this.socket.on('connect', () => this.socket.emit('join-dispatchers'));
