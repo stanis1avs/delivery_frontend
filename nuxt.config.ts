@@ -11,19 +11,26 @@ export default defineNuxtConfig({
       telegramBotId: process.env.TG_BOT_ID
     },
   },
+  // Проксирование /api на бэкенд работает и в dev (devProxy), и в production-сборке
+  // (Nitro routeRules) — раньше прокси был только в vite.server и в проде отваливался (BUG-109).
+  nitro: {
+    devProxy: {
+      '/api': {
+        target: `${process.env.SERVER_URL}/api`,
+        changeOrigin: true,
+      },
+    },
+    routeRules: {
+      '/api/**': {
+        proxy: `${process.env.SERVER_URL}/api/**`,
+      },
+    },
+  },
   vite: {
     css: {
       preprocessorOptions: {
         scss: {
           additionalData: `@use "@/assets/css/mixins.scss" as *;`,
-        },
-      },
-    },
-    server: {
-      proxy: {
-        '/api': {
-          target: process.env.SERVER_URL,
-          changeOrigin: true,
         },
       },
     },
