@@ -76,15 +76,38 @@ export default {
       await this._postOrderAction(item.rawId, 'revert');
     },
 
-    async _postOrderAction(rawId, action) {
-      if (!rawId) return;
-      let token = '';
-      let courierId = '';
+    _courierAuth() {
       try {
         const stored = JSON.parse(localStorage.getItem('tg_user') || '{}');
-        token = stored.geoToken || '';
-        courierId = stored.courierId || '';
-      } catch { /* нет пользователя */ }
+        return { token: stored.geoToken || '', courierId: stored.courierId || '' };
+      } catch {
+        return { token: '', courierId: '' };
+      }
+    },
+
+    /**
+     * Подтянуть уже принятые заказы с бэкенда.
+     * Без этого список жил только на событиях new-order и обнулялся при перезагрузке.
+     */
+    async _loadActiveOrders() {
+      const { token, courierId } = this._courierAuth();
+      if (!token || !courierId) return;
+
+      try {
+        const res = await fetch('/api/orders/active', {
+          headers: { 'X-Courier-Token': token, 'X-Courier-Id': courierId },
+        });
+        if (!res.ok) return;
+        // handleNewOrder дедуплицирует, поэтому гонка с сокетом безопасна
+        (await res.json()).forEach((order) => this.handleNewOrder(order));
+      } catch (err) {
+        console.error('Не удалось загрузить активные заказы:', err);
+      }
+    },
+
+    async _postOrderAction(rawId, action) {
+      if (!rawId) return;
+      const { token, courierId } = this._courierAuth();
 
       try {
         await fetch(`/api/orders/${rawId}/${action}`, {
@@ -131,6 +154,9 @@ export default {
   },
 
   mounted() {
+    // Восстановить уже принятые заказы — иначе после F5 список пуст
+    this._loadActiveOrders();
+
     // Подключаемся к своему origin — Nuxt проксирует /socket.io на бэкенд.
     // Прямой адрес localhost:7070 работал только с машины бэкенда и блокировался
     // как mixed content на HTTPS-странице (ngrok).
