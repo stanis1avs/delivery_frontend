@@ -159,6 +159,10 @@ export default {
 <style scoped lang="scss">
 .map-wrapper {
   position: relative;
+  // Leaflet раздаёт своим слоям z-index вплоть до 1000 (.leaflet-bottom).
+  // Без собственного стекингового контекста они попадают в корневой и
+  // перекрывают элементы страницы — например, меню профиля в шапке.
+  isolation: isolate;
   width: 100%;
   height: 100%;
   min-height: 300px;
