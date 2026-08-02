@@ -1,16 +1,32 @@
 <template>
   <div class="car-cert">
-    <h2>Volkswagen Transporter</h2>
+    <h2>{{ model }}</h2>
     <a href="/documents">View documents</a>
   </div>
   <div class="license-plate">
-    <span>XYZ-123</span>
+    <span>{{ plate }}</span>
   </div>
 </template>
 
 <script>
+import { useActiveOrder } from '@/composables/useActiveOrder.js';
+
 export default {
   name: 'DetailsCar',
+
+  setup() {
+    return { order: useActiveOrder() };
+  },
+
+  computed: {
+    // Транспорт привязан к курьеру и приезжает вместе с заказом (vehicle)
+    model() {
+      return this.order?.vehicle?.model || 'Транспорт не указан';
+    },
+    plate() {
+      return this.order?.vehicle?.plate || '—';
+    },
+  },
 };
 </script>
 

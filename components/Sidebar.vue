@@ -23,6 +23,11 @@ export default {
     getMapRef: { default: null },
   },
 
+  // Выбранный заказ читают блоки получателя, транспорта и параметров доставки
+  setup() {
+    return { activeOrder: useActiveOrder() };
+  },
+
   data() {
     return {
       activeItem: null,
@@ -36,12 +41,15 @@ export default {
       // Если клик по уже активному — деактивируем
       if (this.activeItem === index) {
         this.activeItem = null;
+        this.activeOrder = null;
         this._clearMap();
         return;
       }
 
       this.activeItem = index;
       const order = this.trackingItems[index];
+      // Отдать заказ соседним блокам (получатель, транспорт, параметры доставки)
+      this.activeOrder = order;
 
       // Показать маршрут на карте если у заказа есть координаты
       if (order.pickup_location && order.dropoff_location) {
@@ -126,6 +134,7 @@ export default {
     removeItem(index) {
       if (this.activeItem === index) {
         this.activeItem = null;
+        this.activeOrder = null;
         this._clearMap();
       }
       this.trackingItems.splice(index, 1);
@@ -136,12 +145,14 @@ export default {
       const alreadyExists = this.trackingItems.some((item) => item.id === `#${order.id}`);
       if (alreadyExists) return;
 
+      // Раскладывать поля по одному больше не нужно: бэкенд отдаёт единый формат
+      // и для REST, и для сокета (OrderModule.serializeForClient)
       this.trackingItems.push({
+        ...order,
         id: `#${order.id}`,
         rawId: order.id, // исходный UUID для запросов к бэкенду
         status: order.status || 'In Transit',
         details: order.details || 'Не указано',
-        // Координаты для маршрута (если бэкенд их передаёт)
         pickup_location: order.pickup_location || null,
         dropoff_location: order.dropoff_location || null,
       });
