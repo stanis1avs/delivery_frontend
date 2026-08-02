@@ -24,12 +24,9 @@ export default {
   mounted() {
     if (!import.meta.client) return;
 
-    const runtimeConfig = useRuntimeConfig();
-    const serverUrl = runtimeConfig.public?.serverUrl;
-
-    this.socket = io(serverUrl, {
+    // Свой origin + прокси Nuxt — работает через HTTPS-тоннель и с других устройств
+    this.socket = io({
       path: '/socket.io',
-      transports: ['websocket'],
     });
 
     this.socket.on('connect', () => this.socket.emit('join-dispatchers'));

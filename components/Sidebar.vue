@@ -131,12 +131,13 @@ export default {
   },
 
   mounted() {
-    const runtimeConfig = useRuntimeConfig();
-    const serverUrl = runtimeConfig.public?.serverUrl;
-
-    this.socket = io(serverUrl, {
+    // Подключаемся к своему origin — Nuxt проксирует /socket.io на бэкенд.
+    // Прямой адрес localhost:7070 работал только с машины бэкенда и блокировался
+    // как mixed content на HTTPS-странице (ngrok).
+    // Транспорт не ограничиваем: polling с апгрейдом до websocket переживает прокси,
+    // websocket-only падал целиком, если апгрейд не проходил.
+    this.socket = io({
       path: '/socket.io',
-      transports: ['websocket'],
     });
 
     this.socket.on('connect', () => {

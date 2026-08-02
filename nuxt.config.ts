@@ -19,10 +19,22 @@ export default defineNuxtConfig({
         target: `${process.env.SERVER_URL}/api`,
         changeOrigin: true,
       },
+      // Socket.IO тоже через прокси: клиент подключается к своему origin, поэтому
+      // соединение работает и через HTTPS-тоннель, и с другого устройства.
+      // Раньше он шёл напрямую на ws://localhost:7070 и был доступен только
+      // с машины, где запущен бэкенд.
+      '/socket.io': {
+        target: `${process.env.SERVER_URL}/socket.io`,
+        changeOrigin: true,
+        ws: true,
+      },
     },
     routeRules: {
       '/api/**': {
         proxy: `${process.env.SERVER_URL}/api/**`,
+      },
+      '/socket.io/**': {
+        proxy: `${process.env.SERVER_URL}/socket.io/**`,
       },
     },
   },
