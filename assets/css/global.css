@@ -59,6 +59,17 @@ main {
 
 .truck-info:nth-child(1) {
   margin: 20px 0 20px 20px;
+  /* Вторая строка задана явно: при grid-template-rows: auto оба потомка уходили
+     в неявные строки, суммарная высота превышала фиксированную высоту колонки,
+     и нижние карточки («Distance», «Estimated Time») обрезались */
+  grid-template-rows: minmax(0, auto) minmax(0, 1fr);
+}
+
+.truck-details {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .truck-info:nth-child(2) {
@@ -69,8 +80,11 @@ main {
 
 .truck-image {
   width: 100%;
-  height: auto;
-  max-height: 40vh;
+  height: 100%;
+  min-height: 0;
+  max-height: 32vh;
+  /* Без contain картинка растягивалась под строку грида и искажалась */
+  object-fit: contain;
 }
 
 @media (max-width: 1366px) {

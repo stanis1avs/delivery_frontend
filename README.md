@@ -4,7 +4,9 @@
 
 Проект сервиса доставки — приложение для курьеров. За основу взят [макет Figma](https://www.figma.com/design/cZ3pCVoUAQUSqmNyXH1PtN/Delivery-Service-Dashboard---Admin-Panel--Community-?node-id=0-1&p=f&t=3kIzuy2rIRglQLOK-0).
 
-[Функционал приложения](https://github.com/stanis1avs/delivery_frontend/blob/master/FUNCTIONAL.md)
+[Функционал приложения](FUNCTIONAL.md)
+
+[Запуск, команды, тесты и эксплуатация](FUNCTIONAL.md)
 
 ### Основная функциональность:
 - Авторизация через Telegram Login Widget
@@ -23,7 +25,8 @@
 2. SCSS
 3. Telegram Auth API
 4. Socket.IO Client
-5. Leaflet + OpenStreetMap - Интерактивная карта     
+5. Leaflet + OpenStreetMap - Интерактивная карта
+6. Playwright - E2E-тесты в реальном браузере
 
 ## Технический стек backend-приложения:
 
@@ -34,6 +37,9 @@
 5. Redis
 6. Telegram Bot API
 7. Socket.IO
-8. _Kafka  (в разработке)_
-9. _Google Text-to-Speech API (в разработке)_ - Голосовые уведомления в Telegram
-10. _TensorFlow.js K-Means (в разработке)_ - расчет скоростей доставки
+8. Vitest + supertest - тесты против живых PostgreSQL и Redis
+9. GitHub Actions - CI на каждый push и pull request
+10. Собственный стенд симуляции - оценка качества распределения заказов
+11. _Kafka  (в разработке)_
+12. _Google Text-to-Speech API (в разработке)_ - Голосовые уведомления в Telegram
+13. _TensorFlow.js K-Means (в разработке)_ - расчет скоростей доставки

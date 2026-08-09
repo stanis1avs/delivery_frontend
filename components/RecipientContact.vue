@@ -52,10 +52,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+// Колонка на всю высоту ячейки: жёлтая карточка тянется, кнопка прижата к низу.
+// Раньше карточка занимала только высоту содержимого, и низ блока не совпадал
+// с соседней карточкой адреса.
 .recipient-contact {
   background-color: var(--tertiary-color);
   border-radius: var(--main-border-radius);
   transition: transform 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
 
   &:hover {
     transform: rotate(-10deg);
@@ -65,10 +70,11 @@ export default {
 
 .recipient {
   background-color: var(--primary-color);
-  border-radius: var(--main-border-radius);
+  border-radius: inherit;
   color: #000;
   padding: var(--padding);
   font-size: var(--middle-font-size);
+  flex: 1;
 
   .recipient-profile {
     display: flex;
